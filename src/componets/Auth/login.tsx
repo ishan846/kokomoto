@@ -3,9 +3,42 @@ import google from "../../assets/google.svg";
 import authCoverImage from "../../assets/authCoverPage.svg";
 import { useNavigate } from "react-router-dom";
 import PasswordInput from "../../common/textFeilds/passwordInput";
+import { useState } from "react";
+import { loginData } from "../../Types/auth";
+import toast from "react-hot-toast";
+import { login } from "../../API/Services/auth";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState<loginData>({
+    email_or_phone: "",
+    password: "",
+    device_id: "Qw21g75-123esd",
+    device_type: "WEB",
+  });
+
+  const handlePassChange = (value: string) => {
+    setFormData({
+      ...formData,
+      password: value,
+    });
+  };
+
+  const loginUser = async () => {
+    try {
+      const response = await login(formData);
+      if (response.status === 200) {
+        toast.success(response?.data?.message);
+        const token = response.data?.data?.token;
+        Cookies.set("token", token);
+        navigate("/afterLogin")
+      }
+    } catch (error: any) {
+      toast.error(error.response.data?.message);
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-[#F8F9F3]">
       <div className="flex justify-between items-center">
@@ -32,11 +65,21 @@ const Login = () => {
                     <input
                       type="email"
                       className="h-14 outline-none bg-[#EEF1F5] rounded-[9.6px] w-full p-2 text-base font-semibold"
+                      value={formData?.email_or_phone}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email_or_phone: e.target.value,
+                        })
+                      }
                     />
                   </div>
-                  <PasswordInput forgot={true} />
+                  <PasswordInput forgot={true} onChange={handlePassChange} />
                   <div className="flex flex-col gap-4">
-                    <Button className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]">
+                    <Button
+                      className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
+                      onClick={loginUser}
+                    >
                       Sign In
                     </Button>
                     <Button className="!normal-case !bg-[#E1F0FF] !text-[#2D313E] !font-semibold !font-[Poppins]">

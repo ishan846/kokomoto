@@ -36,7 +36,10 @@ const VerifyEmail = () => {
                     onChange={setOtp}
                     length={6}
                   />
-                  <Button className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]">
+                  <Button
+                    className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
+                    onClick={() => navigate("/afterLogin")}
+                  >
                     Verify
                   </Button>
                 </div>

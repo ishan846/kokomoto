@@ -3,9 +3,66 @@ import google from "../../assets/google.svg";
 import authCoverImage from "../../assets/authCoverPage.svg";
 import { useNavigate } from "react-router-dom";
 import PasswordInput from "../../common/textFeilds/passwordInput";
+import { useState } from "react";
+import { signupData } from "../../Types/auth";
+import toast from "react-hot-toast";
+import { checkUser, signup } from "../../API/Services/auth";
+import Cookies from "js-cookie";
 
 const CreateAccount = () => {
   const navigate = useNavigate();
+  const [cnfPass, setCnfPass] = useState("");
+  const [formData, setFormData] = useState<signupData>({
+    email: "",
+    phone: "",
+    password: "",
+    full_name: "",
+    device_id: "Qw21g75-123esd",
+    device_type: "WEB",
+  });
+
+  const handlePasswordChange = (value: string) => {
+    setFormData({
+      ...formData,
+      password: value,
+    });
+  };
+
+  const handleCnfPasswordChange = (value: string) => {
+    setCnfPass(value);
+  };
+
+  const existingUser = async () => {
+    try {
+      const response = await checkUser(formData?.email);
+      if (response.status === 200) {
+        if (response.data?.data?.is_registered === true)
+          toast.error("User already exist");
+        else createAccount();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message);
+    }
+  };
+
+  const createAccount = async () => {
+    if (formData?.password !== cnfPass) {
+      toast.error("Passwords must match");
+      return;
+    }
+    try {
+      const response = await signup(formData);
+      if (response.status === 201) {
+        toast.success(response.data?.message);
+        const token = response.data?.data?.token;
+        Cookies.set("token", token);
+        navigate("/verify");
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-[#F8F9F3]">
       <div className="flex justify-between items-center">
@@ -34,6 +91,13 @@ const CreateAccount = () => {
                     <input
                       type="text"
                       className="h-14 outline-none bg-[#EEF1F5] rounded-[9.6px] w-full p-2 text-base font-semibold"
+                      value={formData?.full_name}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          full_name: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -43,6 +107,13 @@ const CreateAccount = () => {
                     <input
                       type="email"
                       className="h-14 outline-none bg-[#EEF1F5] rounded-[9.6px] w-full p-2 text-base font-semibold"
+                      value={formData?.email}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -52,14 +123,24 @@ const CreateAccount = () => {
                     <input
                       type="number"
                       className="h-14 outline-none bg-[#EEF1F5] rounded-[9.6px] w-full p-2 text-base font-semibold"
+                      value={formData?.phone}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          phone: e.target.value,
+                        })
+                      }
                     />
                   </div>
-                  <PasswordInput />
-                  <PasswordInput label="Confirm Password" />
+                  <PasswordInput onChange={handlePasswordChange} />
+                  <PasswordInput
+                    label="Confirm Password"
+                    onChange={handleCnfPasswordChange}
+                  />
                   <div className="flex flex-col gap-3">
                     <Button
                       className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
-                      onClick={() => navigate("/verify")}
+                      onClick={existingUser}
                     >
                       Sign In
                     </Button>

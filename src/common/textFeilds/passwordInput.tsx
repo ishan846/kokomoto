@@ -29,11 +29,11 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <div className="flex justiy-between items-center w-full">
+      <div className="flex justiy-between items-center w-full gap-[170px]">
         <p className="font-semibold text-xs text-[#181C32]">{label}</p>
         {forgot === true ? (
           <p
-            className="font-semibold text-xs text-[#181C32]"
+            className="font-semibold text-xs text-[#181C32] cursor-pointer"
             onClick={() => navigate("/forgotPassword")}
           >
             Forgot Password?
