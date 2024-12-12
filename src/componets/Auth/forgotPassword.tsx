@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import authCoverImage from "../../assets/authCoverPage.svg";
+import gif from "../../assets/coverGif.gif"
 import { useNavigate } from "react-router-dom";
 import logo from "../../../public/kokomattoLogo.svg";
 import { OTP } from "../../common/OTP";
@@ -11,7 +11,7 @@ const ForgotPassword = () => {
   return (
     <div className="w-full h-screen bg-[#F8F9F3]">
       <div className="flex justify-between items-center">
-        <img src={authCoverImage} alt="image" className="h-screen" />
+        <img src={gif} alt="image" className="h-screen" />
         <div className="w-full h-screen flex justify-center items-center">
           <div className="flex flex-col gap-9 justify-center">
             <div className="p-8 rounded-2xl bg-[#FDFDFD] border-[0.66px] border-[#DCDCDC] shadow-custom2">
