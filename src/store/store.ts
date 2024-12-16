@@ -3,8 +3,11 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import emailReducer from "./emailSlice";
 
-const rootReducer = combineReducers({});
+const rootReducer = combineReducers({
+  email: emailReducer
+});
 
 const persistConfig = {
   key: "root",

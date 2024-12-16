@@ -1,5 +1,13 @@
 import axios from "axios";
-import { CHANGE_PASS, CHECK_USER, LOGIN, SET_PASSWORD, SIGNUP } from "../api";
+import {
+  CHANGE_PASS,
+  CHECK_USER,
+  LOGIN,
+  SEND_OTP,
+  SET_PASSWORD,
+  SIGNUP,
+  VERIFY_OTP,
+} from "../api";
 import { changePassData, loginData, signupData } from "../../Types/auth";
 
 export const login = async (data: loginData) => {
@@ -46,6 +54,28 @@ export const setPassword = async (pass: string) => {
 export const changePassword = async (data: changePassData) => {
   try {
     const response = await axios.post(`${CHANGE_PASS}`, data);
+
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const sendOTP = async (email: string) => {
+  try {
+    const body: any = { email_or_phone: email };
+    const response = await axios.post(`${SEND_OTP}`, body);
+
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const verifyOTP = async (email: string, OTP: string) => {
+  try {
+    const body: any = { email_or_phone: email, otp: OTP };
+    const response = await axios.post(`${VERIFY_OTP}`, body);
 
     return response;
   } catch (error: any) {

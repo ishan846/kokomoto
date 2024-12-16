@@ -5,6 +5,7 @@ export interface signupData {
   full_name: string;
   device_id: string;
   device_type: string;
+  role: string;
 }
 
 export interface loginData {
@@ -12,9 +13,15 @@ export interface loginData {
   password: string;
   device_id: string;
   device_type: string;
+  role: string;
 }
 
 export interface changePassData {
   old_password: string;
   new_password: string;
+}
+
+export interface forgotPasswordData {
+  password: string;
+  cnfPassword: string;
 }

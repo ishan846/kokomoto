@@ -34,7 +34,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         {forgot === true ? (
           <p
             className="font-semibold text-xs text-[#181C32] cursor-pointer"
-            onClick={() => navigate("/forgotPassword")}
+            onClick={() => navigate("/auth/enterEmail")}
           >
             Forgot Password?
           </p>
