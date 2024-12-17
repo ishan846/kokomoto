@@ -1,6 +1,6 @@
 export const roles = [
-  { id: 1, value: "CUSTOMER" },
-  { id: 2, value: "INDIVIDUAL_SELLER" },
-  { id: 3, value: "ORG_SELLER" },
-  { id: 4, value: "SELLER_EMPLOYEE" },
+  { id: 1, key: "CUSTOMER", value: "CUSTOMER" },
+  { id: 2, key: "INDIVIDUAL_SELLER", value: "INDIVIDUAL SELLER" },
+  { id: 3, key: "ORG_SELLER", value: "ORG SELLER" },
+  // { id: 4, key: "SELLER_EMPLOYEE", value: "SELLER EMPLOYEE" },
 ];

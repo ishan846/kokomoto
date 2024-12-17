@@ -15,27 +15,17 @@ const ForgotPassword = () => {
   const [otp, setOtp] = useState("");
 
   const handleOTP = async () => {
-    if (otp !== "123456") {
-      toast.dismiss();
-      toast.error("Incorrect OTP");
-      return;
+    try {
+      const response = await verifyOTP(email, otp);
+      if (response.status === 200) {
+        toast.dismiss();
+        toast.success("OTP verified successfully");
+        navigate("/auth/changePass");
+        dispatch(clearEmail());
+      }
+    } catch (error: any) {
+      toast.error(error.response.data?.detail ?? "Something went wrong");
     }
-    toast.dismiss();
-    toast.success("OTP verified successfully");
-    navigate("/auth/changePass");
-    dispatch(clearEmail());
-
-    // try {
-    //   const response = await verifyOTP(email, otp);
-    //   if (response.status === 200) {
-    //     toast.dismiss();
-    //     toast.success("OTP verified successfully");
-    //     navigate("/auth/changePass");
-    //     dispatch(clearEmail());
-    //   }
-    // } catch (error: any) {
-    //   toast.error(error.response.data?.detail ?? "Something went wrong");
-    // }
   };
 
   return (

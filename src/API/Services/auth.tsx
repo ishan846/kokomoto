@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-useless-catch */
 import axios from "axios";
 import {
   CHANGE_PASS,
@@ -7,12 +9,37 @@ import {
   SET_PASSWORD,
   SIGNUP,
   VERIFY_OTP,
+  LOGIN_WITH_OTP
 } from "../api";
 import { changePassData, loginData, signupData } from "../../Types/auth";
+import Cookies from "js-cookie";
 
 export const login = async (data: loginData) => {
   try {
     const response = await axios.post(`${LOGIN}`, data);
+
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const loginwithOTP = async (data: loginData) => {
+  try {
+    const formData = data.login_type === 'OTP' ? {
+      device_id: data.device_id,
+      device_type: data.device_type,
+      email_or_phone: data.email_or_phone,
+      otp: data.otp,
+      role: data.role
+    } : {
+      device_id: data.device_id,
+      device_type: data.device_type,
+      email_or_phone: data.email_or_phone,
+      password: data.password,
+      role: data.role
+    };
+    const response = await axios.post(`${LOGIN_WITH_OTP}`, formData);
 
     return response;
   } catch (error: any) {
@@ -32,7 +59,7 @@ export const signup = async (data: signupData) => {
 
 export const checkUser = async (email: string) => {
   try {
-    let query = `?email_or_phone=${email}`;
+    const query = `?email_or_phone=${email}`;
     const response = await axios.get(`${CHECK_USER}${query}`);
 
     return response;
@@ -74,8 +101,14 @@ export const sendOTP = async (email: string) => {
 
 export const verifyOTP = async (email: string, OTP: string) => {
   try {
-    const body: any = { email_or_phone: email, otp: OTP };
-    const response = await axios.post(`${VERIFY_OTP}`, body);
+    const token = Cookies.get("token");
+    const body = { email_or_phone: email, otp: OTP };
+    
+    const response = await axios.post(`${VERIFY_OTP}`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
     return response;
   } catch (error: any) {

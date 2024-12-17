@@ -22,7 +22,7 @@ const SuccessScreen: React.FC<SuccessProps> = () => {
             </div>
             <Button
               className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins] w-full"
-              onClick={() => navigate("/afterLogin")}
+              onClick={() => navigate("/auth")}
             >
               Sign In
             </Button>
