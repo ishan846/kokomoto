@@ -6,8 +6,12 @@ import PasswordInput from "../../common/textFeilds/passwordInput";
 import { forgotPasswordData, ValidationErrors } from "../../Types/auth";
 import toast from "react-hot-toast";
 import { setPassword } from "../../API/Services/auth";
+import { useLocation } from "react-router-dom";
+import { admin_setPassword } from "../../API/Services/adminAuth";
 
 const ChangePassword = () => {
+  const location = useLocation();
+  const isSuperAdmin: boolean = location.pathname.includes("super-admin");
   const [success, setSuccess] = useState(false);
   const [passData, setPassData] = useState<forgotPasswordData>({
     password: "",
@@ -101,6 +105,10 @@ const ChangePassword = () => {
     }
   };
 
+  const handeSubmit = () => {
+    isSuperAdmin ? setSaPass() : setPass();
+  };
+
   const setPass = async () => {
     const allTouched: Record<string, boolean> = {};
     Object.keys(passData).forEach((key) => (allTouched[key] = true));
@@ -115,6 +123,26 @@ const ChangePassword = () => {
 
     try {
       await setPassword(passData?.password);
+      setSuccess(true);
+    } catch (error: any) {
+      toast.error(error.response.data?.detail);
+    }
+  };
+
+  const setSaPass = async () => {
+    const allTouched: Record<string, boolean> = {};
+    Object.keys(passData).forEach((key) => (allTouched[key] = true));
+    allTouched.confirmPassword = true;
+    setTouched(allTouched);
+
+    if (!validateForm()) {
+      toast.dismiss();
+      toast.error("Please enter password(s)");
+      return;
+    }
+
+    try {
+      await admin_setPassword(passData?.password);
       setSuccess(true);
     } catch (error: any) {
       toast.error(error.response.data?.detail);
@@ -158,7 +186,7 @@ const ChangePassword = () => {
                   <div className="flex flex-col gap-4">
                     <Button
                       className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
-                      onClick={setPass}
+                      onClick={handeSubmit}
                     >
                       Reset
                     </Button>

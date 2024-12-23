@@ -22,7 +22,7 @@ const VerifyEmail = () => {
     // }
     // toast.dismiss();
     // toast.success("OTP verified successfully");
-    // navigate("/afterLogin");
+    // navigate("/home/dashboard");
     // dispatch(clearEmail());
 
     try {

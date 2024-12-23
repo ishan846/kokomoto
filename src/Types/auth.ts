@@ -27,7 +27,7 @@ export interface loginData {
   otp?: string;       // Add optional OTP field
   device_id: string;
   device_type: string;
-  role: string;
+  role?: string;
   login_type: 'PASSWORD' | 'OTP';  // Add login type to distinguish between methods
 }
 

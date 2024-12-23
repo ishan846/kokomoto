@@ -1,31 +1,93 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../../public/kokomattoLogo.svg";
 import { OTP } from "../../common/OTP";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import toast from "react-hot-toast";
 import { clearEmail } from "../../store/emailSlice";
-import { verifyOTP } from "../../API/Services/auth";
+import { forgetPassword } from "../../API/Services/auth";
+import { admin_forgetPassword } from "../../API/Services/adminAuth";
 
 const ForgotPassword = () => {
+  const location = useLocation();
+  const isSuperAdmin: boolean = location.pathname.includes("super-admin");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const email = useAppSelector((state) => state.email.email);
   const [otp, setOtp] = useState("");
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = () => {
+    isSuperAdmin ? handleSaOTP() : handleOTP();
+  };
 
   const handleOTP = async () => {
+    if (!showPasswordFields) {
+      setShowPasswordFields(true);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     try {
-      const response = await verifyOTP(email, otp);
+      const response = await forgetPassword(email, otp, newPassword);
       if (response.status === 200) {
         toast.dismiss();
-        toast.success("OTP verified successfully");
-        navigate("/auth/changePass");
+        toast.success("Password updated successfully");
+        navigate("/auth/login");
         dispatch(clearEmail());
       }
     } catch (error: any) {
       toast.error(error.response.data?.detail ?? "Something went wrong");
     }
+  };
+
+  const handleSaOTP = async () => {
+    if (!showPasswordFields) {
+      setShowPasswordFields(true);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await admin_forgetPassword(email, otp, newPassword);
+      if (response.status === 200) {
+        toast.dismiss();
+        toast.success("Password updated successfully");
+        navigate("super-admin/auth/login");
+        dispatch(clearEmail());
+      }
+    } catch (error: any) {
+      toast.error(error.response.data?.detail ?? "Something went wrong");
+    }
+  };
+
+  const isButtonEnabled = () => {
+    if (!showPasswordFields) {
+      return otp.length === 6;
+    }
+    return (
+      otp.length === 6 &&
+      newPassword.length >= 6 &&
+      confirmPassword.length >= 6 &&
+      newPassword === confirmPassword
+    );
+  };
+
+  const handleBack = () => {
+    isSuperAdmin ? navigate("/super-admin/auth") : navigate("/auth");
   };
 
   return (
@@ -50,16 +112,53 @@ const ForgotPassword = () => {
               <div className="px-3">
                 <OTP separator={" "} value={otp} onChange={setOtp} length={6} />
               </div>
+
+              {showPasswordFields && (
+                <div className="flex flex-col gap-4">
+                  <p className="font-semibold text-xs text-[#181C32] w-full">
+                    New Password
+                  </p>
+                  <TextField
+                    type="password"
+                    variant="outlined"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    fullWidth
+                    size="small"
+                  />
+                  <p className="font-semibold text-xs text-[#181C32] w-full">
+                    Confirm Password
+                  </p>
+                  <TextField
+                    type="password"
+                    variant="outlined"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    fullWidth
+                    size="small"
+                    error={
+                      newPassword !== confirmPassword && confirmPassword !== ""
+                    }
+                    helperText={
+                      newPassword !== confirmPassword && confirmPassword !== ""
+                        ? "Passwords do not match"
+                        : ""
+                    }
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col gap-3">
                 <Button
                   className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
-                  onClick={handleOTP}
+                  onClick={handleSubmit}
+                  disabled={!isButtonEnabled()}
                 >
-                  Verify
+                  {showPasswordFields ? "Update Password" : "Next"}
                 </Button>
                 <Button
                   className="!normal-case !text-[#040308] !font-semibold !font-[Poppins] !text-xs"
-                  onClick={() => navigate("/auth")}
+                  onClick={handleBack}
                 >
                   Back to Login
                 </Button>

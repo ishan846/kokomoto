@@ -9,7 +9,8 @@ import {
   SET_PASSWORD,
   SIGNUP,
   VERIFY_OTP,
-  LOGIN_WITH_OTP
+  LOGIN_WITH_OTP,
+  FORGET_PASSWORD
 } from "../api";
 import { changePassData, loginData, signupData } from "../../Types/auth";
 import Cookies from "js-cookie";
@@ -88,10 +89,10 @@ export const changePassword = async (data: changePassData) => {
   }
 };
 
-export const sendOTP = async (email: string) => {
+export const sendOTP = async (email: string, query?: string) => {
   try {
     const body: any = { email_or_phone: email };
-    const response = await axios.post(`${SEND_OTP}`, body);
+    const response = await axios.post(query ? `${SEND_OTP}?${query}`:`${SEND_OTP}`, body);
 
     return response;
   } catch (error: any) {
@@ -115,3 +116,14 @@ export const verifyOTP = async (email: string, OTP: string) => {
     throw error;
   }
 };
+
+export const forgetPassword = async (email: string, OTP: string, password: string) => {
+  try {
+  const body = { email_or_phone: email, otp: OTP, password };
+  const response = await axios.put(`${FORGET_PASSWORD}`, body);
+  return response;
+}
+catch(error: any) {
+  throw error;
+}
+}

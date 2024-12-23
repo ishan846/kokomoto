@@ -8,7 +8,7 @@ import {
   Tabs,
 } from "@mui/material";
 import google from "../../assets/google.svg";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PasswordInput from "../../common/textFeilds/passwordInput";
 import { useState } from "react";
 import { loginData } from "../../Types/auth";
@@ -16,10 +16,19 @@ import toast from "react-hot-toast";
 import { login, loginwithOTP, sendOTP } from "../../API/Services/auth";
 import Cookies from "js-cookie";
 import { roles } from "../../utils/helperData";
+import {
+  admin_login,
+  admin_loginwithOTP,
+  admin_sendOTP,
+} from "../../API/Services/adminAuth";
 
 const Login = () => {
+  const location = useLocation();
+  const isSuperAdmin: boolean = location.pathname.includes("super-admin");
   const navigate = useNavigate();
-  const [loginMethod, setLoginMethod] = useState<'PASSWORD' | 'OTP'>('PASSWORD');
+  const [loginMethod, setLoginMethod] = useState<"PASSWORD" | "OTP">(
+    "PASSWORD"
+  );
   const [otpSent, setOtpSent] = useState(false);
   const [formData, setFormData] = useState<loginData>({
     email_or_phone: "",
@@ -27,8 +36,7 @@ const Login = () => {
     otp: "",
     device_id: "Qw21g75-123esd",
     device_type: "WEB",
-    role: "",
-    login_type: 'PASSWORD'
+    login_type: "PASSWORD",
   });
 
   const handlePassChange = (value: string) => {
@@ -45,6 +53,14 @@ const Login = () => {
     });
   };
 
+  const OTP = () => {
+    isSuperAdmin ? recieveSaOTP() : recieveOTP();
+  };
+
+  const userLogin = () => {
+    isSuperAdmin ? loginSaUser() : loginUser();
+  };
+
   const recieveOTP = async () => {
     if (!formData.email_or_phone) {
       toast.error("Please enter email or phone number");
@@ -52,8 +68,21 @@ const Login = () => {
     }
     try {
       const response = await sendOTP(formData.email_or_phone);
-      if(response.status === 200)
-      toast.success("OTP sent successfully");
+      if (response.status === 200) toast.success("OTP sent successfully");
+      setOtpSent(true);
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Failed to send OTP");
+    }
+  };
+
+  const recieveSaOTP = async () => {
+    if (!formData.email_or_phone) {
+      toast.error("Please enter email or phone number");
+      return;
+    }
+    try {
+      const response = await admin_sendOTP(formData.email_or_phone);
+      if (response.status === 200) toast.success("OTP sent successfully");
       setOtpSent(true);
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Failed to send OTP");
@@ -72,11 +101,11 @@ const Login = () => {
 
     const updatedFormData = {
       ...formData,
-      login_type: loginMethod
+      login_type: loginMethod,
     };
 
-    if (loginMethod === 'OTP'){
-      if(!formData.otp){
+    if (loginMethod === "OTP") {
+      if (!formData.otp) {
         toast.error("Please enter OTP");
         return;
       }
@@ -86,15 +115,14 @@ const Login = () => {
           toast.success(response?.data?.message);
           const token = response.data?.data?.token;
           Cookies.set("token", token);
-          navigate("/afterLogin");
+          navigate("/home/dashboard");
         }
       } catch (error: any) {
-        console.log(error)
+        console.log(error);
         toast.error(error.response.data?.detail);
       }
-
     } else {
-      if(!formData.password) {
+      if (!formData.password) {
         toast.error("Please enter Password");
         return;
       }
@@ -104,14 +132,59 @@ const Login = () => {
           toast.success(response?.data?.message);
           const token = response.data?.data?.token;
           Cookies.set("token", token);
-          navigate("/afterLogin");
+          navigate("/home/dashboard");
         }
       } catch (error: any) {
         toast.error(error.response.data?.detail);
       }
     }
+  };
 
+  const loginSaUser = async () => {
+    if (!formData.email_or_phone) {
+      toast.error("Please enter email or phone number");
+      return;
+    }
 
+    const updatedFormData = {
+      ...formData,
+      login_type: loginMethod,
+    };
+
+    if (loginMethod === "OTP") {
+      if (!formData.otp) {
+        toast.error("Please enter OTP");
+        return;
+      }
+      try {
+        const response = await admin_loginwithOTP(updatedFormData);
+        if (response.status === 200) {
+          toast.success(response?.data?.message);
+          const token = response.data?.data?.token;
+          Cookies.set("token", token);
+          navigate("/home/dashboard");
+        }
+      } catch (error: any) {
+        console.log(error);
+        toast.error(error.response.data?.detail);
+      }
+    } else {
+      if (!formData.password) {
+        toast.error("Please enter Password");
+        return;
+      }
+      try {
+        const response = await admin_login(updatedFormData);
+        if (response.status === 200) {
+          toast.success(response?.data?.message);
+          const token = response.data?.data?.token;
+          Cookies.set("token", token);
+          navigate("/home/dashboard");
+        }
+      } catch (error: any) {
+        toast.error(error.response.data?.detail);
+      }
+    }
   };
 
   return (
@@ -121,12 +194,17 @@ const Login = () => {
           <div className="flex flex-col gap-7 font-[Inter]">
             <div className="flex flex-col">
               <p className="font-[900] text-3xl">Welcome to Kokomatto</p>
-              <p
-                className="font-semibold text-sm text-[#2D313E] cursor-pointer"
-                onClick={() => navigate("/auth/signup")}
-              >
-                <span className="text-[#A7A8BB]">New Here?</span> Create an Account
-              </p>
+              {isSuperAdmin ? (
+                <></>
+              ) : (
+                <p
+                  className="font-semibold text-sm text-[#2D313E] cursor-pointer"
+                  onClick={() => navigate("/auth/signup")}
+                >
+                  <span className="text-[#A7A8BB]">New Here?</span> Create an
+                  Account
+                </p>
+              )}
             </div>
 
             <Tabs
@@ -134,11 +212,11 @@ const Login = () => {
               onChange={(_, newValue) => {
                 setLoginMethod(newValue);
                 setOtpSent(false);
-                setFormData(prev => ({
+                setFormData((prev) => ({
                   ...prev,
                   otp: "",
                   password: "",
-                  login_type: newValue
+                  login_type: newValue,
                 }));
               }}
               className="mb-4"
@@ -148,29 +226,33 @@ const Login = () => {
             </Tabs>
 
             <div className="flex flex-col gap-5 w-full">
-              <div className="flex flex-col gap-2">
-                <p className="font-semibold text-xs text-[#181C32] w-full">
-                  Role
-                </p>
-                <FormControl fullWidth>
-                  <Select
-                    value={formData?.role}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        role: e.target?.value,
-                      })
-                    }
-                    className="h-14 !outline-none bg-[#EEF1F5] !rounded-[9.6px] w-full p-2 !text-base !font-semibold !border-none"
-                  >
-                    {roles?.map((option) => (
-                      <MenuItem key={option?.id} value={option?.key}>
-                        {option?.value}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
+              {isSuperAdmin ? (
+                <></>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="font-semibold text-xs text-[#181C32] w-full">
+                    Role
+                  </p>
+                  <FormControl fullWidth>
+                    <Select
+                      value={formData?.role}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          role: e.target?.value,
+                        })
+                      }
+                      className="h-14 !outline-none bg-[#EEF1F5] !rounded-[9.6px] w-full p-2 !text-base !font-semibold !border-none"
+                    >
+                      {roles?.map((option) => (
+                        <MenuItem key={option?.id} value={option?.key}>
+                          {option?.value}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+              )}
 
               <div className="flex flex-col gap-2">
                 <p className="font-semibold text-xs text-[#181C32] w-full">
@@ -189,7 +271,7 @@ const Login = () => {
                 />
               </div>
 
-              {loginMethod === 'PASSWORD' ? (
+              {loginMethod === "PASSWORD" ? (
                 <PasswordInput forgot={true} onChange={handlePassChange} />
               ) : (
                 <div className="flex flex-col gap-2">
@@ -198,7 +280,7 @@ const Login = () => {
                       OTP
                     </p>
                     <Button
-                      onClick={recieveOTP}
+                      onClick={OTP}
                       className="!normal-case !text-[#2D313E] !font-semibold !font-[Poppins]"
                     >
                       {otpSent ? "Resend OTP" : "Send OTP"}
@@ -217,7 +299,7 @@ const Login = () => {
               <div className="flex flex-col gap-4">
                 <Button
                   className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
-                  onClick={loginUser}
+                  onClick={userLogin}
                 >
                   Sign In
                 </Button>

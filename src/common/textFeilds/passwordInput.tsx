@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface PasswordInputProps {
   label?: string;
@@ -22,6 +22,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   helperText,
   value,
 }) => {
+  const location = useLocation();
+  const isSuperAdmin = location.pathname.includes("super-admin");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,6 +42,14 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
     }
   };
 
+  const handleForgotPass = () => {
+    if (isSuperAdmin) {
+      navigate("/super-admin/auth/enterEmail");
+    } else {
+      navigate("/auth/enterEmail");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex justiy-between items-center w-full gap-[170px]">
@@ -47,18 +57,17 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         {forgot === true ? (
           <p
             className="font-semibold text-xs text-[#181C32] cursor-pointer hover:text-[#2D313E]"
-            onClick={() => navigate("/auth/enterEmail")}
+            onClick={handleForgotPass}
           >
             Forgot Password?
           </p>
-        ) : null
-        }
+        ) : null}
       </div>
       <div className="relative w-full">
         <input
           type={showPassword ? "text" : "password"}
           className={`h-14 outline-none bg-[#EEF1F5] rounded-[9.6px] w-full p-2 text-base font-semibold 
-            ${error ? 'border-2 border-red-500' : ''}
+            ${error ? "border-2 border-red-500" : ""}
           `}
           onChange={handleChange}
           onBlur={handleBlur}

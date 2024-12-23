@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import logo from "../../../public/kokomattoLogo.svg";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAppDispatch } from "../../store/store";
 import { setEmail } from "../../store/emailSlice";
@@ -8,8 +8,11 @@ import { checkUser, sendOTP } from "../../API/Services/auth";
 import toast from "react-hot-toast";
 import { ValidationErrors } from "../../Types/auth";
 import Cookies from "js-cookie";
+import { admin_sendOTP } from "../../API/Services/adminAuth";
 
 const EnterEmail = () => {
+  const location = useLocation();
+  const isSuperAdmin = location.pathname.includes("super-admin");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [emailId, setEmailId] = useState<string>("");
@@ -56,6 +59,10 @@ const EnterEmail = () => {
     }
   };
 
+  const handleSubmit = () => {
+    isSuperAdmin ? handleSendSaOTP() : existingUser();
+  };
+
   const existingUser = async () => {
     if (!validateForm()) {
       toast.dismiss();
@@ -76,7 +83,7 @@ const EnterEmail = () => {
 
   const handleSendOTP = async () => {
     try {
-      const response = await sendOTP(emailId);
+      const response = await sendOTP(emailId, "send_to_forgot_password=1");
       if (response.status === 200) {
         toast.dismiss();
         toast.success("OTP sent, please check your email");
@@ -84,6 +91,22 @@ const EnterEmail = () => {
         Cookies.set("token", token);
         dispatch(setEmail(emailId));
         navigate("/auth/forgotPassword");
+      }
+    } catch (error: any) {
+      toast.error(error.response.data.detail ?? "Something went wrong");
+    }
+  };
+
+  const handleSendSaOTP = async () => {
+    try {
+      const response = await admin_sendOTP(emailId, "send_to_forgot_password=1");
+      if (response.status === 200) {
+        toast.dismiss();
+        toast.success("OTP sent, please check your email");
+        const token = response.data?.data?.token;
+        Cookies.set("token", token);
+        dispatch(setEmail(emailId));
+        navigate("/super-admin/auth/forgotPassword");
       }
     } catch (error: any) {
       toast.error(error.response.data.detail ?? "Something went wrong");
@@ -136,7 +159,7 @@ const EnterEmail = () => {
               <div className="flex flex-col gap-4">
                 <Button
                   className="!normal-case !bg-[#2D313E] !text-white !font-semibold !font-[Poppins]"
-                  onClick={existingUser}
+                  onClick={handleSubmit}
                 >
                   Send OTP
                 </Button>

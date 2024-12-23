@@ -4,7 +4,6 @@ import CreateAccount from "../componets/Auth/createAccount";
 import VerifyEmail from "../componets/Auth/verifyEmail";
 import ForgotPassword from "../componets/Auth/forgotPassword";
 import ChangePassword from "../componets/Auth/changePassword";
-import AfterLogin from "../componets/Auth/afterLogin";
 import EnterEmail from "../componets/Auth/enterEmail";
 
 const AuthRoutes = () => {
@@ -16,7 +15,6 @@ const AuthRoutes = () => {
       <Route path="enterEmail" element={<EnterEmail />} />
       <Route path="forgotPassword" element={<ForgotPassword />} />
       <Route path="changePass" element={<ChangePassword />} />
-      <Route path="afterLogin" element={<AfterLogin />} />
       <Route path="/" element={<Navigate to="login" replace />} />
     </Routes>
   );
